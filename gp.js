@@ -15,7 +15,7 @@ const GP = {
   KIND: { pal: '帕鲁', building: '建筑物', gear: '装备', event: '事件' },
   boardHtml() {
     const b = this.board || { top: [] }, me = Account.user ? Account.user.username : pname();
-    return `<div class="gp-board"><div class="gp-bh"><span>🏆 全服排行榜</span><small>${b.live || 0} 人挑战中 · 共 ${b.total || 0} 次挑战</small></div>
+    return `<div class="gp-board"><div class="gp-bh"><span>🏆 本机排行榜</span><small>${b.live || 0} 人挑战中 · 共 ${b.total || 0} 次挑战</small></div>
       <ol>${b.top.slice(0, 30).map((r, i) => `<li class="${r.name === me ? 'me' : ''} ${i < 3 ? 'top' + (i + 1) : ''}"><span class="rk">${i + 1}</span><span class="nm">${esc(r.name)}${r.acct ? '' : '<em>游客</em>'}</span>
         <span class="cl">${r.colors.map(c => `<i style="background:${this.COL[c]}"></i>`).join('')}</span><span class="w"><b>${r.wins}</b> 胜</span>${r.status === 'play' ? '<span class="lv">挑战中</span>' : ''}</li>`).join('') || '<li class="empty">还没有人上榜，成为第一个吧！</li>'}</ol></div>`;
   },
@@ -24,7 +24,7 @@ const GP = {
     if (!r) {
       el.innerHTML = `<div class="gp-intro"><div class="gp-hero"><div class="gp-k">GRAND PRIX</div><h1>大奖赛</h1>
         <ul class="gp-rules"><li><b>1</b>随机分配两种颜色</li><li><b>2</b>每轮从「两色 + 无色」卡池中随机给出 3 张，三选一，共 50 轮组成卡组</li><li><b>3</b>用这副卡组无限连战随机的「地狱」对手</li><li><b>4</b>累计输 3 场挑战结束，按胜场登上排行榜</li></ul>
-        <button class="gp-go" id="gp-start"><span>开 始 挑 战</span></button>${Account.user ? '' : '<div class="muted gp-note">登录账号后成绩会以账号名上榜，并在各设备同步</div>'}</div>${this.boardHtml()}</div>`;
+        <button class="gp-go" id="gp-start"><span>开 始 挑 战</span></button>${Account.user ? '' : '<div class="muted gp-note">单机版：成绩与存档保存在本机浏览器</div>'}</div>${this.boardHtml()}</div>`;
       $('#gp-start').onclick = () => this.start();
       return;
     }

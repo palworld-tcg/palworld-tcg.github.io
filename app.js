@@ -354,7 +354,7 @@ async function refreshMenu() {
     $('#mn-pz-info').textContent = `已解 ${App.puzzles.filter(p => pd[p.id]).length} / ${App.puzzles.length}`;
     const L = App.presets.filter(p => p.group); $('#mn-dc-info').textContent = `已击败 ${L.filter(p => dd[p.key]).length} / ${L.length}`;
     const b = await (await fetch('/api/gp/board')).json(), t = b.top[0];
-    $('#mn-gp-info').innerHTML = (t ? `🏆 全服最佳：<b>${esc(t.name)}</b> ${t.wins} 胜` : '🏆 排行榜虚位以待') + (b.live ? `　·　${b.live} 人挑战中` : '');
+    $('#mn-gp-info').innerHTML = (t ? `🏆 本机最佳：<b>${esc(t.name)}</b> ${t.wins} 胜` : '🏆 排行榜虚位以待') + (b.live ? `　·　${b.live} 人挑战中` : '');
   } catch (e) { }
 }
 document.addEventListener('click', e => {
