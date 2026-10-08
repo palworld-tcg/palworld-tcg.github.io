@@ -63,7 +63,7 @@
   LocalWS.CONNECTING = 0; LocalWS.OPEN = 1; LocalWS.CLOSING = 2; LocalWS.CLOSED = 3;
   window.WebSocket = LocalWS;
   // ---------- 单机版界面调整 ----------
-  const REPO = 'https://github.com/palworld-tcg/palworld-tcg';
+  const REPO = 'https://github.com/binyxu/palworld-tcg';
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('demo');
     const pvp = document.querySelector('.m-pvp');
@@ -75,6 +75,6 @@
       .demo-foot{position:fixed;left:8px;bottom:6px;font-size:11px;opacity:.55;z-index:5;pointer-events:auto}.demo-foot a{color:inherit}
       body.ingame .demo-foot{display:none}`;
     document.head.appendChild(css);
-    document.body.insertAdjacentHTML('beforeend', `<div class="demo-foot">非官方粉丝二创 · 非盈利 · 卡牌与美术版权归 Pocketpair 及官方所有 · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a></div>`);
+    document.body.insertAdjacentHTML('beforeend', `<div class="demo-foot">非官方粉丝二创 · 非盈利 · 卡牌与美术版权归 Pocketpair, Inc. 及官方所有 · <a href="${REPO}" target="_blank" rel="noopener">GitHub</a></div>`);
   });
 })();
