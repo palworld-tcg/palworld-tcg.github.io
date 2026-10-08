@@ -358,6 +358,7 @@ async function refreshMenu() {
   } catch (e) { }
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('[data-tut-open]')) { Sound.sfx('confirm'); Tutorial.open(); return; }
   const t = e.target.closest('[data-go]'); if (t) { Sound.sfx('confirm'); show(t.dataset.go); return; }
   if (e.target.closest('#hdr-back')) { Sound.sfx('back'); show('menu'); }
   if (e.target.closest('#snd-btn')) soundPanel();

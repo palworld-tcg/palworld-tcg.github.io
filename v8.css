@@ -43,7 +43,8 @@ body[data-view="title"] main,body[data-view="menu"] main{padding:0}
 .mn-wrap{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;height:calc(100vh - 62px);padding:3.5vh 4vw;box-sizing:border-box;max-width:1700px;margin:0 auto}
 .mn-left,.mn-right{display:flex;flex-direction:column;gap:18px;min-height:0}
 .mn-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1;min-height:0}
-.mn-row2{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mn-row2{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tile[data-tut-open] .tl-n{color:#ffd75a}
 body:not(.ingame) .tile{position:relative;overflow:hidden;border-radius:18px;padding:0;border:1px solid #ffffff1f;background:#0c1322;text-align:left;cursor:pointer;
   box-shadow:0 20px 50px #0009;transition:transform .28s var(--ease),box-shadow .28s,border-color .28s;animation:tileIn .7s var(--ease) both;display:block;width:100%}
 .mn-left .tile:nth-child(1){animation-delay:.05s}.mn-row .tile:nth-child(1){animation-delay:.15s}.mn-row .tile:nth-child(2){animation-delay:.22s}

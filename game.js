@@ -124,7 +124,7 @@ const Game = {
         ${p.exile.length ? `<div class="pile" data-exile="${side === 'me' ? 0 : 1}"><span class="cap">放逐</span><img src="${cardImg(p.exile[p.exile.length - 1].id)}"><span class="cnt">${p.exile.length}</span></div>` : ''}
         <div class="pile" style="border-style:solid;opacity:.85" title="灵魂卡组"><span class="cap">灵魂卡组</span>${p.soulDeck ? '<img src="/ui/card_back.jpg">' : ''}<span class="cnt">${p.soulDeck}</span></div></div>`;
     const plaque = (p, side, active) => `<div class="plaque ${side} ${active ? 'active' : ''} ${side === 'op' && tgtPlayer ? 'tgt' : ''} ${s.battle && s.battle.target === 'player' && active === false ? 'tgt' : ''}" data-plaque="${side}">
-        <div class="heart"><span>${p.life}</span></div><div class="hud-r"><div class="nm-row"><div class="nm">${esc(p.name)}</div>${side === 'me' && !this.replay && !s.puzzle ? `<button class="emo-btn" id="emo-btn" title="表情 / 嘲讽（T）">😀</button>` : ''}</div>
+        <div class="heart"><span>${p.life}</span></div><div class="hud-r"><div class="nm-row"><div class="nm">${esc(p.name)}</div>${side === 'me' && !this.replay && !s.puzzle && !s.tutorial ? `<button class="emo-btn" id="emo-btn" title="表情 / 嘲讽（T）">😀</button>` : ''}</div>
         <div class="lifebar" title="生命 ${p.life}">${Array.from({ length: Math.max(10, p.life) }, (_, i) => `<i class="${i < p.life ? 'on' : ''} ${i < p.life && p.life <= 3 ? 'low' : ''}"></i>`).join('')}</div>
         <div class="rs">${this.res('hand', '手牌', p.handCount)}${this.res('mat', '素材', p.material)}${this.res('food', '食材', p.ingredient)}</div></div></div>`;
     const endAct = a && a.kind === 'main' ? a.actions.findIndex(x => x.t === 'end') : -1;
@@ -142,7 +142,7 @@ const Game = {
       ${lane(me, 'pal', `我的据点 · 帕鲁 ${me.base.filter(c => c.kind === 'pal').length}/5`, 'm')}${lane(me, 'bld', '我的 · 建筑物/装备', 'm')}${souls(me, 'me')}${piles(me, 'me')}
       <div class="hand a-mhand" id="hand">${me.hand.map((c, i) => this.cardHtml(c, { zone: 'hand', style: this.fan(hn, i, 3.5) })).join('')}</div>
       ${this.trayHtml(s)}
-      ${s.puzzle ? this.puzzleHtml(s) : ''}
+      ${s.puzzle ? this.puzzleHtml(s) : ''}${s.tutorial ? Tutorial.html(s) : ''}
       ${s.over && (this.overReady || this.replay) ? this.resultHtml(s) : ''}
     </div>
     ${this.replay ? this.replayBar() : ''}<div class="gtools" ${this.replay ? 'style="display:none"' : ''}><button id="undobtn" ${s.canUndo && !s.undoReq ? '' : 'disabled'} title="每局最多 3 次${!s.pve ? '，联机需对方同意' : ''}">↶ 悔棋<span class="badge">${s.undos ?? 0}</span></button>${s.gid ? `<button id="gidbtn" title="点击复制对局 ID，用于复盘或反馈问题">🆔 ${s.gid.slice(0, 8)}</button>` : ''}<button onclick="Game.fullscreen()">⛶ 全屏</button><button id="sidebtn">☰ 记录/聊天${this.unread ? `<span class="badge">${this.unread}</span>` : ''}</button>${s.over ? '' : '<button id="concede">🏳 投降</button>'}</div>
@@ -155,6 +155,7 @@ const Game = {
     </div>`;
     const lg = $('#glog'); lg.scrollTop = lg.scrollHeight;
     this.bind(s);
+    if (s.tutorial && !this.replay) Tutorial.bind(s);
   },
   // 取消（撤回当前行动，不消耗悔棋次数）/ 悔棋 按钮，任何选择界面都显示
   escBtns(s) {
@@ -203,7 +204,7 @@ const Game = {
   },
   resultHtml(s) {
     const w = s.over.winner, cls = w === s.me ? 'win' : 'lose';
-    return `<div class="result"><div class="big ${w === -1 ? 'lose' : cls}">${w === -1 ? '平 局' : w === s.me ? '胜 利' : '败 北'}</div><div class="why">${esc(s.over.reason)}</div>${s.puzzle ? this.puzzleResult(s) : ''}${s.gp && s.gp.result ? this.gpResult(s) : ''}${s.gid && !this.replay ? `<div class="why" style="font-size:13px">对局 ID：<code>${s.gid}</code>　<button onclick="Game.openReplay('${s.gid}')">📼 复盘本局</button></div>` : ''}<button class="primary" style="font-size:18px;padding:10px 36px" onclick="Game.leave()">${s.gp ? "返回大奖赛" : "返回"}</button></div>`;
+    return `<div class="result"><div class="big ${w === -1 ? 'lose' : cls}">${w === -1 ? '平 局' : w === s.me ? '胜 利' : '败 北'}</div><div class="why">${esc(s.over.reason)}</div>${s.puzzle ? this.puzzleResult(s) : ''}${s.tutorial ? Tutorial.result(s) : ''}${s.gp && s.gp.result ? this.gpResult(s) : ''}${s.gid && !this.replay ? `<div class="why" style="font-size:13px">对局 ID：<code>${s.gid}</code>　<button onclick="Game.openReplay('${s.gid}')">📼 复盘本局</button></div>` : ''}<button class="primary" style="font-size:18px;padding:10px 36px" onclick="Game.leave()">${s.gp ? "返回大奖赛" : "返回"}</button></div>`;
   },
   onBoard(uid) { const s = this.last.state; return s.players.some(p => p.base.some(c => c.uid === uid) || (p.hand || []).some(c => c.uid === uid)); },
 
