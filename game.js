@@ -379,7 +379,7 @@ const Game = {
     };
     const up = ev => {
       removeEventListener('pointermove', move); removeEventListener('pointerup', up);
-      if (!drag) { if (kind === 'card') this.click(el); return; }
+      if (!drag) { if (kind === 'card' && !window.__longPress) this.click(el); return; }
       drag.end(ev.clientX, ev.clientY);
     };
     addEventListener('pointermove', move); addEventListener('pointerup', up);

@@ -417,7 +417,7 @@ function renderRules() {
 <li>警戒：你的回合结束时竖置。嘲讽、隐秘、袭击见上。夜行性：黑夜时战斗力+300。复仇：战斗中被放置于墓地时，战斗对手也放置于墓地。突破：攻击中战斗对手帕鲁被放置于墓地时，对对方玩家造成等同打击力的伤害。</li>
 <li>任命：横置你竖置的帕鲁以支付建筑物费用。解体：将你据点的帕鲁放置入墓地。</li></ul></div>`;
 }
-document.addEventListener('mouseover', e => { const z = e.target.closest('[data-zoom]'); if (z) showZoom(z.dataset.zoom, z.dataset.extra, z.closest('.card') || z, z.dataset.img); });
+document.addEventListener('mouseover', e => { if (window.__touchT && Date.now() - window.__touchT < 1000) return; const z = e.target.closest('[data-zoom]'); if (z) showZoom(z.dataset.zoom, z.dataset.extra, z.closest('.card') || z, z.dataset.img); });
 document.addEventListener('mouseout', e => { if (e.target.closest('[data-zoom]')) hideZoom(); });
 
 (async function init() {

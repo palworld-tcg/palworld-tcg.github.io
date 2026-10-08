@@ -1,0 +1,80 @@
+/* ===== 多设备适配：手机 / 平板 / 触屏 ===== */
+html{-webkit-text-size-adjust:100%}
+body{overscroll-behavior:none}
+
+/* 对局：整个桌面按设计尺寸排版，再整体缩放到屏幕（由 mobile.js 设置 --VW/--VH 与 scale） */
+#v-game.fit{position:fixed;inset:0;overflow:hidden}
+#v-game.fit #board{position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(var(--S))}
+#v-game.fit #board,#v-game.fit .mat{width:var(--VW);height:var(--VH)}
+#v-game{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* 竖屏手机：请横屏 */
+#rotate-tip{display:none;position:fixed;inset:0;z-index:9800;background:#05070df2;color:#f3ecdc;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px;font-size:16px;line-height:1.7}
+#rotate-tip .ph{width:64px;height:104px;border:4px solid #ffd75a;border-radius:12px;position:relative;animation:rotPh 2.2s ease-in-out infinite}
+#rotate-tip .ph::after{content:"";position:absolute;left:50%;bottom:6px;width:12px;height:4px;margin-left:-6px;border-radius:2px;background:#ffd75a}
+@keyframes rotPh{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+#rotate-tip button{padding:10px 26px;font-size:15px}
+#rotate-tip small{opacity:.6;font-size:12px}
+body.portrait-game #rotate-tip{display:flex}
+
+/* 触屏：取消悬停放大，改为长按查看 */
+@media (hover:none){
+  .hand .card:hover{transform:none!important;margin:0 calc(var(--cw) * -.14)}
+  .card:hover .in{box-shadow:0 3px 8px #0009}
+  .hand .card.touch-up{transform:translateY(calc(var(--ch) * -.3)) scale(1.15)!important;z-index:30}
+}
+#zoom.touch{pointer-events:auto}
+
+/* ---- 平板 / 窄屏 ---- */
+@media (max-width:1100px){
+  .builder{grid-template-columns:1fr 300px}
+}
+/* ---- 手机 ---- */
+@media (max-width:760px){
+  #top{gap:8px!important;padding:6px 10px!important;flex-wrap:nowrap}
+  .brand span{display:none}
+  .brand img{height:28px!important}
+  .hdr-title{font-size:16px!important;white-space:nowrap;letter-spacing:2px!important;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .hdr-back{flex:none}
+  .me{font-size:0!important;display:flex;align-items:center;gap:6px;margin-left:auto;flex:none}
+  .me #pname{font-size:13px;width:84px;padding:4px 6px}
+  .me #acc,.me #acc *{font-size:12px}
+  .me .gh-star{margin-right:0;padding:0 7px;height:26px}.me .gh-star>span:not(.n){display:none}
+  .gh-star.fx{right:10px;top:10px}
+
+  #v-builder,#v-gallery,#v-rules,#v-gacha{padding:12px 10px!important}
+  .builder{grid-template-columns:1fr!important}
+  .builder .decklist{max-height:none}
+  .cardgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;max-height:none!important}
+  .filters{display:flex;flex-wrap:wrap;gap:6px}.filters input,.filters select{flex:1 1 40%;min-width:0}
+
+  .g-stage{min-height:420px}
+  .g-row{gap:8px}
+  .mn-wrap{padding:12px!important;gap:12px!important}
+  .mn-row2{grid-template-columns:repeat(2,1fr)!important}
+  .t-hero .tl-n{font-size:34px!important}
+
+  #modal>div,.modal{max-width:94vw!important;box-sizing:border-box}
+  .pk-box{width:96vw!important;height:92vh!important}
+
+  .demo-foot{position:static!important;display:block;text-align:center;padding:10px 8px 14px;opacity:.5}
+  .gp{padding:14px 10px 30px!important}
+}
+/* 横屏手机（矮屏）：菜单紧凑 */
+@media (max-height:500px) and (orientation:landscape){
+  #top{padding:4px 12px!important}
+  .brand img{height:26px!important}.brand span{display:none}
+  .mn-wrap{height:auto!important;padding:10px 14px!important}
+  .t-hero{min-height:220px!important}
+  .demo-foot{display:none}
+}
+@media (max-width:760px){
+  body:not([data-view="menu"]) .brand{display:none}
+  .hdr-back{width:34px!important;height:34px!important}
+  .me #pname{width:72px}
+  .me #acc button,.me #acc a{padding:4px 9px!important;font-size:12px!important;white-space:nowrap}
+  .me .snd-btn{width:32px!important;height:32px!important}
+  #top{overflow:hidden;max-width:100vw;box-sizing:border-box}
+}
+@media (max-width:380px){ .me .gh-star{display:none} }
+@media (max-width:760px){.hdr-title{flex:1 1 auto;letter-spacing:0!important;font-size:15px!important}}

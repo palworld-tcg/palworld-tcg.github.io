@@ -31,13 +31,14 @@ const Tutorial = {
     const T = s.tutorial, st = T.steps[this.i] || {}, n = T.steps.length;
     const win = s.over && s.over.winner === s.me;
     const top = s.deckTop && T.id === 't3' && !win ? `<div class="tut-top">对手卡组顶 → ${s.deckTop[1].map(id => `<img src="${cardImg(id)}" data-zoom="${id}">`).join('')}</div>` : '';
-    return `<div class="tutbox"><div class="tut-h"><span>🎓 ${esc(T.title)}</span><small>${Math.min(this.i + 1, n)} / ${n}</small></div>
+    return `<div class="tutbox ${this.mini && !win ? 'mini' : ''}"><div class="tut-h" id="tut-h" title="点击收起/展开"><span>🎓 ${esc(T.title)}</span><small>${Math.min(this.i + 1, n)} / ${n} ${this.mini ? '▸' : '▾'}</small></div>
       <div class="tut-bar"><i style="width:${(win ? n : this.i) / n * 100}%"></i></div>
       <div class="tut-t">${win ? '🎉 <b>完成！</b>' + (T.next ? '继续下一课吧。' : '你已经学会了基本玩法，去「对战」挑战电脑吧！') : st.text || ''}</div>${top}
       <div class="tut-row">${st.next && !win ? '<button class="primary" id="tut-next">继续 ▶</button>' : ''}<button id="tut-re">↻ 重来</button><button id="tut-list">课程列表</button></div></div>`;
   },
   bind(s) {
     const T = s.tutorial, st = T.steps[this.i] || {};
+    const hh = $('#tut-h'); if (hh) hh.onclick = () => { this.mini = !this.mini; Game.render(); };
     const nx = $('#tut-next'); if (nx) nx.onclick = () => { this.i++; Game.render(); };
     const re = $('#tut-re'); if (re) re.onclick = () => { Game.leave(); setTimeout(() => this.start(T.id), 250); };
     const ls = $('#tut-list'); if (ls) ls.onclick = () => { Game.leave(); setTimeout(() => this.open(), 250); };
@@ -62,7 +63,7 @@ const Tutorial = {
   const css = document.createElement('style');
   css.textContent = `
   .tutbox{position:absolute;left:190px;top:4px;z-index:56;width:440px;background:#14202ff2;border:2px solid #ffd75a;border-radius:12px;color:#f3ecdc;font-size:14px;line-height:1.65;padding:8px 12px;box-shadow:0 6px 24px #0008}
-  .tutbox .tut-h{display:flex;justify-content:space-between;font-weight:900;color:#ffd75a}.tutbox .tut-h small{color:#cdbb8a;font-weight:400}
+  .tutbox.mini .tut-bar,.tutbox.mini .tut-t,.tutbox.mini .tut-row,.tutbox.mini .tut-top{display:none}.tutbox .tut-h{cursor:pointer;display:flex;justify-content:space-between;font-weight:900;color:#ffd75a}.tutbox .tut-h small{color:#cdbb8a;font-weight:400}
   .tutbox .tut-bar{height:4px;background:#ffffff1c;border-radius:2px;margin:4px 0 6px;overflow:hidden}.tutbox .tut-bar i{display:block;height:100%;background:#ffd75a;transition:width .4s}
   .tutbox .tut-t b{color:#ffe7a8}
   .tutbox .tut-row{display:flex;gap:6px;margin-top:8px}.tutbox .tut-row button{padding:4px 12px;font-size:13px}

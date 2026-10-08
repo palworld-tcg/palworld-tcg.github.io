@@ -2,10 +2,10 @@
 body.ingame #top{display:none}
 body.ingame main{padding:0}
 body.ingame{overflow:hidden;background:#0d1620}
-#v-game{--side:0px;--ch:min(calc((100vh - 120px) / 3.4), calc((100vw - 80px) / 7.1));--cw:calc(var(--ch) * .716);--r:calc(var(--cw) * .055)}
-#board{position:relative;height:100vh;width:100vw}
+#v-game{--side:0px;--ch:min(calc((var(--VH,100vh) - 120px) / 3.4), calc((var(--VW,100vw) - 80px) / 7.1));--cw:calc(var(--ch) * .716);--r:calc(var(--cw) * .055)}
+#board{position:relative;height:var(--VH,100vh);width:var(--VW,100vw)}
 .mat{position:relative;overflow:hidden;background:#2c6aa8 url(/ui/playmat.jpg) center/cover;
-  height:100vh;display:grid;grid-template-columns:calc(var(--cw) + 34px) 1fr calc(var(--cw) * 2.7) calc(var(--cw) + 34px);
+  height:var(--VH,100vh);display:grid;grid-template-columns:calc(var(--cw) + 34px) 1fr calc(var(--cw) * 2.7) calc(var(--cw) + 34px);
   grid-template-rows:calc(var(--ch) * .36) calc(var(--ch) + 14px) minmax(64px,1fr) calc(var(--ch) + 14px) calc(var(--ch) * .8);
   grid-template-areas:"oleft ohand ohand oright" "oleft opal obld oright" "oleft mid mid mright" "mleft mpal mbld mright" "mleft mhand mhand mright";
   transition:filter .8s}
