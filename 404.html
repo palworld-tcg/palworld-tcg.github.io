@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>幻兽帕鲁卡牌游戏 · 在线对战平台</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/game.css">
+<link rel="stylesheet" href="/gacha.css">
+<link rel="stylesheet" href="/modern.css">
+<link rel="stylesheet" href="/v8.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand"><img src="/ui/logo.png" alt="PALWORLD"><span>幻兽帕鲁卡牌游戏<br>在线对战平台</span></div>
+  <button id="hdr-back" class="hdr-back" title="返回主菜单（Esc）"><span>◀</span></button>
+  <div class="hdr-title" id="hdr-title"></div>
+  <nav style="display:none">
+    <button data-view="menu">主菜单</button>
+    <button data-view="builder">卡组构筑</button>
+    <button data-view="gacha">✨ 抽卡</button>
+    <button data-view="gallery">卡牌图鉴</button>
+    <button data-view="rules">规则速查</button>
+  </nav>
+  <div class="me"><button id="snd-btn" class="snd-btn" title="声音设置">🔊</button> 玩家名：<input id="pname" maxlength="16"> <span id="acc"></span></div>
+</header>
+
+<main>
+  <!-- 大厅 -->
+  <!-- 标题画面 -->
+  <section id="v-title" class="view">
+    <div class="t-bg"></div><div class="t-vignette"></div><div class="h-particles" id="t-particles"></div>
+    <div class="t-cards" id="t-cards"></div>
+    <div class="t-center">
+      <img class="t-logo" src="/ui/logo.png" alt="PALWORLD">
+      <div class="t-sub">OFFICIAL CARD GAME</div>
+      <div class="t-cn">幻 兽 帕 鲁 · 卡 牌 游 戏</div>
+      <button class="t-start" id="t-start"><span>开始游戏</span></button>
+      <div class="t-hint">点击任意位置 / 按任意键</div>
+    </div>
+    <div class="t-foot">非官方粉丝作品 · 卡图版权归 Pocketpair, Inc. 所有</div>
+  </section>
+
+  <!-- 主菜单 -->
+  <section id="v-menu" class="view">
+    <div class="mn-bg"></div>
+    <div class="mn-wrap">
+      <div class="mn-left">
+        <button class="tile t-hero" data-go="gp" data-art="BP01-001SSP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">NEW · GRAND PRIX</div><div class="tl-n">大奖赛</div><div class="tl-d">随机双色 · 三选一构筑 50 张 · 无尽连战，三败出局</div><div class="tl-x" id="mn-gp-info"></div></div></button>
+        <div class="mn-row">
+          <button class="tile" data-go="pz" data-art="BP01-073SSP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">PUZZLE</div><div class="tl-n">残局挑战</div><div class="tl-x" id="mn-pz-info"></div></div></button>
+          <button class="tile" data-go="dc" data-art="BP01-049SSP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">DECK CHALLENGE</div><div class="tl-n">卡组挑战</div><div class="tl-x" id="mn-dc-info"></div></div></button>
+        </div>
+      </div>
+      <div class="mn-right">
+        <button class="tile sm" data-go="battle" data-art="BP01-025SSP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">BATTLE</div><div class="tl-n">对战</div><div class="tl-d">人机 · 在线房间 · 复盘</div></div></button>
+        <button class="tile sm" data-go="builder" data-art="BP01-046SP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">DECK BUILDER</div><div class="tl-n">卡组构筑</div></div></button>
+        <button class="tile sm" data-go="gacha" data-art="BP01-074SP"><div class="tl-art"></div><div class="tl-in"><div class="tl-k">BOOSTER</div><div class="tl-n">抽卡</div></div></button>
+        <div class="mn-row2">
+          <button class="tile xs" data-go="gallery"><div class="tl-in"><div class="tl-n">📖 图鉴</div></div></button>
+          <button class="tile xs" data-go="rules"><div class="tl-in"><div class="tl-n">📜 规则</div></div></button>
+          <button class="tile xs" data-go="title"><div class="tl-in"><div class="tl-n">⏏ 标题</div></div></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 大奖赛 -->
+  <section id="v-gp" class="view"><div id="gp" class="gp"></div></section>
+
+  <!-- 对战 -->
+  <section id="v-home" class="view">
+    <div class="modes" id="modes">
+      <div class="mode m-deck">
+        <div class="m-head"><span class="m-ico">🃏</span><div><h2>出战卡组</h2><p>人机与在线对战使用</p></div></div>
+        <select id="home-deck"></select>
+        <div id="home-deck-info" class="muted"></div>
+        <div id="rnd-colors" class="chips">
+          <button class="cc on" data-c="">纯随机</button><button class="cc" data-c="red" style="--cc:#e0473f">红</button><button class="cc" data-c="blue" style="--cc:#3d8bfd">蓝</button><button class="cc" data-c="green" style="--cc:#3fb950">绿</button><button class="cc" data-c="purple" style="--cc:#a371f7">紫</button>
+        </div>
+        <div class="m-note">随机卡组颜色，最多 2 色</div>
+        <label class="m-lab">随机/预设卡组的卡牌版本</label><select id="home-rare"><option value="">普通版</option><option value="mix">混入稀有版（SR/OSR/SP/SSP）</option><option value="max">全部最高稀有 ✨</option></select>
+      </div>
+      <div class="mode m-pve">
+        <div class="m-head"><span class="m-ico">🤖</span><div><h2>人机对战</h2><p>规则 AI · 三档难度</p></div></div>
+        <div class="diff">
+          <button data-pve="easy"><b>简单</b><small>入门</small></button>
+          <button data-pve="normal"><b>普通</b><small>标准</small></button>
+          <button data-pve="hard"><b>困难</b><small>深度搜索 AI</small></button>
+          <button data-pve="hell" class="hell"><b>地狱</b><small>透视全部信息</small></button>
+        </div>
+        <label class="m-lab">对手卡组</label><select id="pve-opp"></select>
+      </div>
+      <div class="mode m-pvp">
+        <div class="m-head"><span class="m-ico">🌐</span><div><h2>在线对战</h2><p>创建房间，邀请好友</p></div></div>
+        <button class="wide primary" id="btn-create">创建房间</button>
+        <div class="join"><input id="join-code" maxlength="4" placeholder="4 位房间号"><button id="btn-join">加入</button></div>
+        <div class="m-lab">等待中的房间</div><ul id="room-list" class="rooms"></ul>
+      </div>
+    </div>
+
+    <div class="replay">
+      <div class="m-head"><span class="m-ico">📼</span><div><h2>对局复盘</h2><p>粘贴对局 ID 或从最近对局中选择</p></div></div>
+      <div class="join"><input id="rp-id" placeholder="完整 ID 或前 8 位"><button id="btn-replay">复盘</button></div>
+      <ul id="my-games" class="games"></ul>
+    </div>
+  </section>
+
+  <section id="v-pz" class="view">
+    <section class="pzhub" id="pzhub">
+      <div class="pz-top">
+        <div><div class="sec-kicker">PUZZLE CHALLENGE</div><h2 class="sec-title">残局挑战</h2>
+          <p class="sec-sub">完全公开信息：对手手牌、双方卡组顺序全部可见。对手由求解器操控，会找出所有能让你翻车的应对。每一题都经程序证明存在必胜解。</p></div>
+        <div class="pz-prog"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" class="bg"/><circle cx="18" cy="18" r="15.9" class="fg" id="pz-ring" stroke-dasharray="0 100"/></svg><div><b id="pz-count">0/0</b><span>已解</span></div></div>
+      </div>
+      <div class="pz-tabs" id="pz-tabs">
+        <button class="on" data-f="all">全部</button><button data-f="life">打血</button><button data-f="mill">🃏 卡组耗尽</button><button data-f="todo">未解</button><button data-f="done">已解</button>
+        <span class="sp"></span><button data-f="l12">★1-2</button><button data-f="l34">★3-4</button><button data-f="l56">★5-6</button>
+      </div>
+      <div id="puzzle-list" class="pzgrid"></div>
+    </section>
+  </section>
+
+  <section id="v-dc" class="view">
+    <section class="pzhub dchub" id="dchub">
+      <div class="pz-top">
+        <div><div class="sec-kicker">DECK CHALLENGE</div><h2 class="sec-title">卡组挑战</h2>
+          <p class="sec-sub">对手由「深度搜索 AI」驾驶社区知名卡组与精调预设卡组。用你的卡组击败它们——胜率数据来自数千局 AI 对战。</p></div>
+        <div class="pz-prog"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" class="bg"/><circle cx="18" cy="18" r="15.9" class="fg" id="dc-ring" stroke-dasharray="0 100"/></svg><div><b id="dc-count">0/0</b><span>已击败</span></div></div>
+      </div>
+      <div class="dc-mydeck"><span class="dcm-l">⚔ 我的出战卡组</span><select id="dc-deck"></select><span class="dcm-i" id="dc-deck-info"></span><button id="dc-deck-edit">去构筑</button></div>
+      <div class="pz-tabs" id="dc-tabs"><button class="on" data-f="all">全部</button><button data-f="meta">🏆 知名卡组</button><button data-f="preset">⚙ 精调预设</button><button data-f="todo">未击败</button></div>
+      <div id="dc-list" class="pzgrid"></div>
+    </section>
+  </section>
+
+  <!-- 卡组构筑 -->
+  <section id="v-builder" class="view">
+    <div class="builder">
+      <div class="pool">
+        <div class="filters">
+          <input id="f-text" placeholder="搜索卡名/效果">
+          <select id="f-color"><option value="">全部颜色</option><option value="red">红</option><option value="blue">蓝</option><option value="green">绿</option><option value="purple">紫</option><option value="none">无色</option></select>
+          <select id="f-kind"><option value="">全部种类</option><option value="pal">帕鲁</option><option value="building">建筑物</option><option value="gear">装备</option><option value="event">事件</option></select>
+          <select id="f-cost"><option value="">全部费用</option></select>
+          <select id="f-ver"><option value="">普通版</option><option value="best">最高稀有版</option><option value="rare">仅稀有版（SR/OSR/SP/SSP…）</option><option value="all">全部版本</option></select>
+        </div>
+        <div id="pool" class="cardgrid"></div>
+      </div>
+      <div class="decklist">
+        <div class="row">
+          <select id="b-decks"></select>
+          <button id="b-new">新建</button><button id="b-del">删除</button>
+        </div>
+        <div class="row"><input id="b-name" placeholder="卡组名称"><button id="b-save">保存</button></div>
+        <div class="row"><select id="b-rmode"><option value="true">真随机</option><option value="shape" selected>牌型随机</option><option value="curve">曲线随机</option></select><select id="b-rare" title="随机生成/载入预设时使用的卡牌版本"><option value="">普通版</option><option value="mix">混入稀有版</option><option value="max">全部最高稀有</option></select><button id="b-random">随机生成</button><select id="b-preset"></select><button id="b-clear">清空</button><button id="b-upgrade">✨ 全部升为最稀有</button><button id="b-downgrade">还原普通版</button><button id="b-export">导出</button><button id="b-import">导入</button></div>
+        <div id="b-stats"></div>
+        <div id="b-errors"></div>
+        <div id="b-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 图鉴 -->
+  <section id="v-gallery" class="view">
+    <div class="filters"><input id="g-text" placeholder="搜索"></div>
+    <div id="gallery" class="cardgrid"></div>
+  </section>
+
+  <!-- 规则 -->
+  <section id="v-gacha" class="view"><div class="panel" id="gacha"></div></section>
+  <section id="v-rules" class="view"><div class="panel" id="rules-text"></div></section>
+
+  <!-- 对局 -->
+  <section id="v-game" class="view">
+    <div id="board"></div>
+  </section>
+</main>
+
+<div id="zoom" class="hidden"></div>
+<div id="modal" class="hidden"><div class="box"></div></div>
+<div id="toast"></div>
+<script src="/demo.js"></script>
+<script src="/emotes.js"></script>
+<script src="/audio.js"></script>
+<script src="/account.js"></script>
+<script src="/app.js"></script>
+<script src="/builder.js"></script>
+<script src="/game.js"></script>
+<script src="/picker.js"></script>
+<script src="/rarefx.js"></script>
+<script src="/gacha.js"></script>
+<script src="/gp.js"></script>
+</body>
+</html>
