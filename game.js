@@ -145,7 +145,7 @@ const Game = {
       ${s.puzzle ? this.puzzleHtml(s) : ''}${s.tutorial ? Tutorial.html(s) : ''}
       ${s.over && (this.overReady || this.replay) ? this.resultHtml(s) : ''}
     </div>
-    ${this.replay ? this.replayBar() : ''}<div class="gtools" ${this.replay ? 'style="display:none"' : ''}><button id="undobtn" ${s.canUndo && !s.undoReq ? '' : 'disabled'} title="每局最多 3 次${!s.pve ? '，联机需对方同意' : ''}">↶ 悔棋<span class="badge">${s.undos ?? 0}</span></button>${s.gid ? `<button id="gidbtn" title="点击复制对局 ID，用于复盘或反馈问题">🆔 ${s.gid.slice(0, 8)}</button>` : ''}<button onclick="Game.fullscreen()">⛶ 全屏</button><button id="sidebtn">☰ 记录/聊天${this.unread ? `<span class="badge">${this.unread}</span>` : ''}</button>${s.over ? '' : '<button id="concede">🏳 投降</button>'}</div>
+    ${this.replay ? this.replayBar() : ''}<div class="gtools" ${this.replay ? 'style="display:none"' : ''}><button id="undobtn" ${s.canUndo && !s.undoReq ? '' : 'disabled'} title="每局最多 10 次${!s.pve ? '，联机需对方同意' : ''}">↶ 悔棋<span class="badge">${s.undos ?? 0}</span></button>${s.gid ? `<button id="gidbtn" title="点击复制对局 ID，用于复盘或反馈问题">🆔 ${s.gid.slice(0, 8)}</button>` : ''}<button onclick="Game.fullscreen()">⛶ 全屏</button><button id="sidebtn">☰ 记录/聊天${this.unread ? `<span class="badge">${this.unread}</span>` : ''}</button>${s.over ? '' : '<button id="concede">🏳 投降</button>'}</div>
     ${s.undoReq === 'theirs' ? `<div class="undoask"><b>对手申请悔棋</b><div class="muted" style="color:#cbb">同意后对手将撤回上一步操作</div><div class="row"><button class="primary" data-undo="1">同意</button><button data-undo="0">拒绝</button></div></div>` : ''}
     <div class="sidebar ${this.sideOpen ? 'open' : ''}"><button class="x">❯</button>
       <div class="tools"><button onclick="Game.fullscreen()">⛶ 全屏</button>${s.over ? '<button onclick="Game.leave()">${s.gp ? "返回大奖赛" : "返回"}</button>' : ''}</div>
@@ -338,31 +338,31 @@ const Game = {
     if (kind === 'card') {
       const uid = +el.dataset.uid, acts = this.actsFor(uid);
       const play = acts.find(x => x.t === 'play'), atk = acts.find(x => x.t === 'attack');
-      if (play) $$('[data-lane="mpal"],[data-lane="mbld"]').forEach(l => Z.push({ el: l, drop: () => this.answer(play.i) }));
-      if (atk) for (const t of this.attackTargets(uid)) Z.push({ el: t.el, drop: () => { this.pendingTarget = t.key; this.answer(atk.i); } });
+      if (play) $$('[data-lane="mpal"],[data-lane="mbld"]').forEach(l => Z.push({ el: l, lbl: '▶ 使用', drop: () => this.answer(play.i) }));
+      if (atk) for (const t of this.attackTargets(uid)) Z.push({ el: t.el, lbl: '⚔ 攻击', drop: () => { this.pendingTarget = t.key; this.answer(atk.i); } });
       // 任命：把竖置的帕鲁拖到有【任命】能力的建筑物上
       const me = s.players[0], pal = me.base.find(c => c.uid === uid && c.kind === 'pal' && !c.rested);
       if (pal && a.kind === 'main' && !a.quick) {
         for (const b of me.base.filter(c => c.kind !== 'pal')) {
           const ba = this.actsFor(b.uid).filter(x => x.t === 'act' && /任命/.test(x.label)); if (!ba.length) continue;
           const be = $(`.card[data-uid="${b.uid}"]`); if (!be) continue;
-          if (ba.length === 1) Z.push({ el: be, drop: () => { this.pendingAssign = uid; this.answer(ba[0].i); } });
+          if (ba.length === 1) Z.push({ el: be, lbl: '🏠 任命', drop: () => { this.pendingAssign = uid; this.answer(ba[0].i); } });
           else Z.push(...this.pads(ba.map(x => ({ label: '🏠 任命：' + x.label, drop: () => { this.pendingAssign = uid; this.answer(x.i); } }))));
         }
       }
       if (a.kind === 'select' && /任命/.test(a.prompt) && a.cands.some(c => c.uid === uid) && !this.picked.includes(uid))
-        $$('[data-lane="mbld"] .card').forEach(be => Z.push({ el: be, drop: () => this.togglePick(uid) }));
+        $$('[data-lane="mbld"] .card').forEach(be => Z.push({ el: be, lbl: '🏠 任命', drop: () => this.togglePick(uid) }));
       const others = acts.filter(x => x !== play && x !== atk);
       if (a.kind === 'select' && a.cands.some(c => c.uid === uid)) {
         const on = this.picked.includes(uid);
-        if (/阻挡/.test(a.prompt) && s.battle && !on) { const ae = $(`.card[data-uid="${s.battle.att}"]`); if (ae) Z.push({ el: ae, drop: () => this.togglePick(uid) }); }
+        if (/阻挡/.test(a.prompt) && s.battle && !on) { const ae = $(`.card[data-uid="${s.battle.att}"]`); if (ae) Z.push({ el: ae, lbl: '🛡 阻挡', drop: () => this.togglePick(uid) }); }
         Z.push(...this.pads([{ label: on ? '✖ 取消选择' : '✔ 选择这张' + (a.max > 1 ? `（${this.picked.length}/${a.max}）` : ''), drop: () => this.togglePick(uid) }]));
       }
       if (a.kind === 'option' && a.meta && a.meta.targets.includes(uid)) Z.push(...this.pads([{ label: '🎯 攻击这个目标', drop: () => this.answer(a.meta.targets.indexOf(uid)) }]));
       if (others.length) Z.push(...this.pads(others.map(x => ({ label: (x.t === 'act' ? '✦ ' : '▶ ') + x.label, drop: () => this.answer(x.i) }))));
     } else if (kind === 'deck') {
       const sd = this.actsFor(undefined).find(x => x.t === 'soulDraw');
-      if (sd) Z.push({ el: $('#hand'), drop: () => this.answer(sd.i) }, ...this.pads([{ label: '🂠 支付 3 灵魂抽 1 张', drop: () => this.answer(sd.i) }]));
+      if (sd) Z.push({ el: $('#hand'), lbl: '🂠 支付 3 灵魂抽 1 张', drop: () => this.answer(sd.i) }, ...this.pads([{ label: '🂠 支付 3 灵魂抽 1 张', drop: () => this.answer(sd.i) }]));
     } else if (kind === 'orb') {
       $$('#board [data-opt],#board [data-act],#sel-ok,#sel-ok2').forEach(b => { if (!b.disabled) Z.push({ el: b, drop: () => b.click() }); });
       const eb = $('#endbtn.go'); if (eb) Z.push({ el: eb, drop: () => eb.click() });
@@ -378,11 +378,12 @@ const Game = {
       if (drag) drag.move(ev.clientX, ev.clientY);
     };
     const up = ev => {
-      removeEventListener('pointermove', move); removeEventListener('pointerup', up);
+      removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
+      if (ev.type === 'pointercancel') { if (drag) drag.end(-9999, -9999); return; }
       if (!drag) { if (kind === 'card' && !window.__longPress) this.click(el); return; }
       drag.end(ev.clientX, ev.clientY);
     };
-    addEventListener('pointermove', move); addEventListener('pointerup', up);
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   },
   startDrag(el, kind) {
     const Z = this.zonesFor(kind, el);
@@ -391,31 +392,46 @@ const Game = {
     Z.forEach(z => z.el.classList.add(z.pad ? 'pad' : z.el.classList.contains('lane') || z.el.id === 'hand' ? 'drop-ok' : 'tgt'));
     const fromBase = kind === 'card' && !!el.closest('.lane');
     const r0 = el.getBoundingClientRect(), x0 = r0.left + r0.width / 2, y0 = r0.top + r0.height / 2;
-    let svg = null, g = null;
-    if (fromBase) {
-      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.id = 'arrow';
-      svg.innerHTML = `<defs><marker id="ah" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#ff3b3b"/></marker><filter id="gl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path id="ap" fill="none" stroke="#ff3b3b" stroke-width="9" stroke-linecap="round" marker-end="url(#ah)" filter="url(#gl)" stroke-dasharray="18 8"/>`;
-      document.body.appendChild(svg); el.classList.add('attacking');
-    } else {
+    $$('#arrow,.droplbl').forEach(x => x.remove());
+    // 指引线：从卡片出发，悬停到有效目标时吸附并变金色
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.id = 'arrow'; svg.classList.add(fromBase ? 'atk' : 'put');
+    svg.innerHTML = `<defs><marker id="ah" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" class="hd"/></marker><filter id="gl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path id="ap" fill="none" stroke-width="7" stroke-linecap="round" marker-end="url(#ah)" filter="url(#gl)"/><circle id="ar" r="0"/>`;
+    document.body.appendChild(svg);
+    const lbl = document.createElement('div'); lbl.className = 'droplbl'; document.body.appendChild(lbl);
+    let g = null;
+    if (fromBase) el.classList.add('attacking', 'lifting');
+    else {
       g = document.createElement('div'); g.className = 'dragghost' + (kind === 'orb' ? ' orbghost' : '');
       g.innerHTML = kind === 'orb' ? '<span class="orb">✋</span>' : kind === 'deck' ? '<img src="/ui/card_back.jpg" draggable="false">' : el.querySelector('.in').innerHTML;
       const st = getComputedStyle($('#v-game')); g.style.setProperty('--cw', st.getPropertyValue('--cw')); g.style.setProperty('--ch', st.getPropertyValue('--ch'));
+      g.style.left = x0 + 'px'; g.style.top = y0 + 'px';
       document.body.appendChild(g); if (kind === 'card') el.classList.add('dragging');
     }
     const hit = (x, y) => Z.find(z => z.pad && inR(z.el, x, y)) || Z.find(z => inR(z.el, x, y));
     const inR = (e2, x, y) => { const r = e2.getBoundingClientRect(); return x >= r.left - 6 && x <= r.right + 6 && y >= r.top - 6 && y <= r.bottom + 6; };
-    const cleanup = () => { Z.forEach(z => z.el.classList.remove('drop-ok', 'drop-hover', 'tgt')); $$('.pads').forEach(p => p.remove()); if (svg) svg.remove(); el.classList.remove('attacking'); document.body.classList.remove('dragging-now'); };
+    const cleanup = () => { Z.forEach(z => z.el.classList.remove('drop-ok', 'drop-hover', 'tgt')); $$('.pads').forEach(p => p.remove()); svg.remove(); lbl.remove(); el.classList.remove('attacking', 'lifting'); el.style.removeProperty('--lx'); el.style.removeProperty('--ly'); document.body.classList.remove('dragging-now'); };
+    let px = x0, py = y0, vx = 0;
     return {
       move: (x, y) => {
-        if (svg) svg.querySelector('#ap').setAttribute('d', `M${x0},${y0} Q${(x0 + x) / 2},${Math.min(y0, y) - 80} ${x},${y}`);
-        if (g) { g.style.left = x + 'px'; g.style.top = y + 'px'; }
         const h = hit(x, y); Z.forEach(z => z.el.classList.toggle('drop-hover', z === h));
+        let ex = x, ey = y;
+        if (h && !h.pad && !h.el.classList.contains('lane') && h.el.id !== 'hand') { const r = h.el.getBoundingClientRect(); ex = r.left + r.width / 2; ey = r.top + r.height / 2; }
+        const sx = fromBase ? x0 : x0, sy = fromBase ? y0 : y0;
+        const show = fromBase || Math.hypot(x - x0, y - y0) > 40;
+        svg.style.opacity = show ? 1 : 0;
+        svg.querySelector('#ap').setAttribute('d', `M${sx},${sy} Q${(sx + ex) / 2},${Math.min(sy, ey) - 70} ${ex},${ey}`);
+        const rc = svg.querySelector('#ar'); rc.setAttribute('cx', ex); rc.setAttribute('cy', ey); rc.setAttribute('r', h && !h.pad ? 26 : 0);
+        svg.classList.toggle('ok', !!h);
+        if (fromBase) { const dx = Math.max(-40, Math.min(40, (x - x0) * .15)), dy = Math.max(-40, Math.min(40, (y - y0) * .15)); el.style.setProperty('--lx', dx + 'px'); el.style.setProperty('--ly', dy + 'px'); }
+        if (g) { vx = vx * .6 + (x - px) * .4; px = x; py = y; g.style.left = x + 'px'; g.style.top = y + 'px'; g.style.setProperty('--tilt', Math.max(-14, Math.min(14, vx * .8)) + 'deg'); g.classList.toggle('ok', !!h); }
+        const t = h ? (h.lbl || h.el.textContent.trim().slice(0, 16)) : '';
+        lbl.textContent = t; lbl.classList.toggle('on', !!t); lbl.style.left = x + 'px'; lbl.style.top = (y - (g ? 90 : 34)) + 'px';
       },
       end: (x, y) => {
         const h = hit(x, y); cleanup();
-        if (h) { if (g) g.remove(); h.drop(); return; }
+        if (h) { if (g) { const gg = g; gg.classList.add('drop'); setTimeout(() => gg.remove(), 180); } h.drop(); return; }
         el.classList.remove('dragging');
-        if (g) g.animate([{ left: g.style.left, top: g.style.top }, { left: x0 + 'px', top: y0 + 'px' }], { duration: 250, easing: 'ease-out' }).onfinish = () => g.remove();
+        if (g) g.animate([{ left: g.style.left, top: g.style.top, opacity: 1 }, { left: x0 + 'px', top: y0 + 'px', opacity: .3 }], { duration: 260, easing: 'cubic-bezier(.3,.7,.4,1)' }).onfinish = () => g.remove();
       },
     };
   },
@@ -483,6 +499,14 @@ const Game = {
     r.value = Math.log10(this.speed); sync();
     r.oninput = () => { let v = Math.pow(10, +r.value); if (Math.abs(v - 1) < 0.06) v = 1; this.speed = Math.round(v * 100) / 100; localStorage.setItem('ptcg_speed', this.speed); sync(); };
     r.ondblclick = () => { this.speed = 1; r.value = 0; localStorage.setItem('ptcg_speed', 1); sync(); };
+    // 音量（音乐 / 音效 / 静音）
+    const v = document.createElement('div'); v.className = 'volctl';
+    v.innerHTML = `<button class="vm" title="静音"></button><label title="音乐音量">🎵<input type="range" min="0" max="1" step="0.05" data-k="music"></label><label title="音效音量">💥<input type="range" min="0" max="1" step="0.05" data-k="sfx"></label>`;
+    d.appendChild(v);
+    const vs = () => { const st = Sound.st; v.querySelector('.vm').textContent = st.mute ? '🔇' : '🔊'; v.querySelectorAll('input').forEach(i => i.value = st[i.dataset.k]); v.classList.toggle('muted', !!st.mute); };
+    v.querySelector('.vm').onclick = () => { Sound.init(); Sound.set('mute', !Sound.st.mute); vs(); };
+    v.querySelectorAll('input').forEach(i => i.oninput = () => { Sound.init(); if (Sound.st.mute) Sound.set('mute', false); Sound.set(i.dataset.k, +i.value); vs(); if (i.dataset.k === 'sfx') Sound.sfx('card'); });
+    vs();
   },
   float(text, r, cls = '') { const f = document.createElement('div'); f.className = 'float ' + cls; f.textContent = text; f.style.left = r.left + r.width / 2 + 'px'; f.style.top = r.top + r.height / 2 + 'px'; document.body.appendChild(f); this.spd(f); setTimeout(() => f.remove(), this.T(1300)); },
   fx(cls, r) { const f = document.createElement('div'); f.className = cls; f.style.left = r.left + r.width / 2 + 'px'; f.style.top = r.top + r.height / 2 + 'px'; document.body.appendChild(f); this.spd(f); setTimeout(() => f.remove(), this.T(900)); },

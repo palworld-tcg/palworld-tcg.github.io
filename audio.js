@@ -108,7 +108,7 @@ const Sound = (() => {
     }
   }
   // ---------- 自备原声带（服务器 music 目录） ----------
-  let EXT = null, ext = null, extScene = null;
+  let EXT = null, ext = null, extScene = null, extKey = null; const extPos = {};
   const FALL = { title: ['title', 'menu'], menu: ['menu', 'title'], draft: ['draft', 'menu', 'title'], battle: ['battle'] };
   const reload = () => fetch('/api/music').then(r => r.json()).then(j => { EXT = j; if (want && ctx) { const w = want; cur = null; extScene = null; play(w); } }).catch(() => { EXT = { tracks: {} }; }); reload();
   const extList = sc => { if (!EXT || st.src === 'synth') return []; for (const k of FALL[sc] || [sc]) if ((EXT.tracks[k] || []).length) return EXT.tracks[k]; return []; };
@@ -118,13 +118,16 @@ const Sound = (() => {
     f();
   }
   const extVol = () => st.mute ? 0 : Math.min(1, st.music * 1.1);
-  function extStop() { if (!ext) return; const a = ext; ext = null; extScene = null; extFade(a, 0, .8, () => { a.pause(); a.src = ''; }); }
+  function extStop() { if (!ext) return; const a = ext; if (extKey && a.src) extPos[extKey] = { src: a.src, t: a.currentTime }; ext = null; extScene = null; extKey = null; extFade(a, 0, .8, () => { a.pause(); a.src = ''; }); }
   function extPlay(sc, list, once) {
-    if (ext && extScene === sc) return true;
-    extStop(); extScene = sc;
+    const key = list.join('|');
+    if (ext && (extScene === sc || extKey === key)) { extScene = sc; return true; }   // 同一组曲目：继续播放，不从头开始
+    extStop(); extScene = sc; extKey = key;
+    const resume = extPos[key];
     const a = new Audio(); a.preload = 'auto'; a.volume = 0; ext = a;
     let order = (sc === 'title' || sc === 'menu') && /hello/i.test(decodeURIComponent(list[0])) ? [list[0], ...list.slice(1).sort(() => Math.random() - .5)] : list.slice().sort(() => Math.random() - .5), i = 0;
-    const next = () => { if (ext !== a) return; a.src = order[i++ % order.length]; a.play().catch(() => { }); extFade(a, extVol(), 1.2); };
+    if (resume) { const k = order.findIndex(u => resume.src.endsWith(u)); if (k > 0) order.unshift(...order.splice(k, 1)); }
+    const next = () => { if (ext !== a) return; a.src = order[i++ % order.length]; if (resume && i === 1 && resume.src.endsWith(order[0])) a.currentTime = resume.t; a.play().catch(() => { }); extFade(a, extVol(), 1.2); };
     a.onended = () => { if (once) { if (ext === a) { ext = null; extScene = null; } return; } next(); };
     a.onerror = () => { if (ext === a && order.length > 1) next(); };
     next(); return true;

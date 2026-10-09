@@ -124,7 +124,9 @@ body.ingame{overflow:hidden;background:#0d1620}
 .chatrow{display:flex;gap:6px}.chatrow input{flex:1;min-width:0}
 
 /* 拖拽 */
-.dragghost{position:fixed;z-index:200;pointer-events:none;width:var(--cw);height:var(--ch);transform:translate(-50%,-50%) rotate(-4deg) scale(1.12);filter:drop-shadow(0 18px 20px #000c)}
+.dragghost{position:fixed;z-index:200;pointer-events:none;width:var(--cw);height:var(--ch);transform:translate(-50%,-50%) rotate(var(--tilt,-4deg)) scale(1.12);filter:drop-shadow(0 18px 20px #000c);transition:transform .12s,filter .2s}
+.dragghost.ok{transform:translate(-50%,-50%) rotate(0) scale(1.2);filter:drop-shadow(0 0 18px #ffd54a) drop-shadow(0 18px 20px #000c)}
+.dragghost.drop{transition:transform .18s,opacity .18s;transform:translate(-50%,-50%) scale(.85);opacity:0}
 .dragghost img{width:100%;height:100%;border-radius:var(--r)}
 #arrow{position:fixed;inset:0;z-index:150;pointer-events:none}
 .ctxmenu{position:fixed;z-index:210;background:#1e1a17f5;border:2px solid var(--gold);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:200px;box-shadow:0 8px 24px #000c;animation:popin .2s}
@@ -278,3 +280,21 @@ body.ingame.replaying #speedctl{top:96px}
 .pzdeck img.lk{outline:2px solid #ffd54a;box-shadow:0 0 8px #ffd54a}
 .pzdeck{flex-wrap:nowrap;margin-top:4px}.pzdeck img{flex:none;width:30px!important;height:42px!important;transform:none!important;position:static!important}
 .pzinfo .pzb .row{display:flex;gap:6px;align-items:center;margin-top:6px}
+
+#arrow{position:fixed;inset:0;width:100vw;height:100vh;z-index:150;pointer-events:none;transition:opacity .15s}
+#arrow path#ap{stroke:#9fb3c8;stroke-dasharray:14 9;animation:arFlow .5s linear infinite;opacity:.75}
+#arrow .hd{fill:#9fb3c8}
+#arrow.atk path#ap{stroke:#ff3b3b;opacity:1}#arrow.atk .hd{fill:#ff3b3b}
+#arrow.ok path#ap{stroke:#ffd54a;opacity:1}#arrow.ok .hd{fill:#ffd54a}
+#arrow.atk.ok path#ap{stroke:#ff5a2a}#arrow.atk.ok .hd{fill:#ff5a2a}
+#arrow #ar{fill:none;stroke:#ffd54a;stroke-width:3;transition:r .15s}
+@keyframes arFlow{to{stroke-dashoffset:-23}}
+.card.lifting{z-index:40}
+.card.lifting .in{transform:translate(var(--lx,0),calc(var(--ly,0) - 12px)) scale(1.1);transition:transform .1s;box-shadow:0 0 0 4px #ff3030,0 0 30px #ff0000,0 20px 30px #000a}
+.droplbl{position:fixed;z-index:210;pointer-events:none;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:opacity .12s,transform .12s;background:#1e1a17f0;border:2px solid #ffd54a;color:#ffe7a8;border-radius:16px;padding:3px 12px;font-weight:900;font-size:14px;white-space:nowrap;box-shadow:0 4px 14px #000a}
+.droplbl.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.volctl{display:flex;align-items:center;gap:6px;margin-left:6px;padding-left:8px;border-left:1px solid #ffd54a55}
+.volctl .vm{background:none;border:0;padding:0 2px;font-size:15px;cursor:pointer;box-shadow:none}
+.volctl label{display:flex;align-items:center;gap:2px;font-size:12px}.volctl input{width:56px!important}
+.volctl.muted label{opacity:.35}
+body.dragging-now #tutfx{display:none}
