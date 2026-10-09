@@ -32,7 +32,7 @@ const Tutorial = {
     this.sync(s);
     const T = s.tutorial, st = T.steps[this.i] || {}, n = T.steps.length;
     const win = s.over && s.over.winner === s.me;
-    const top = s.deckTop && T.id === 't3' && !win ? `<div class="tut-top">对手卡组顶 → ${s.deckTop[1].slice(0, 3).map(id => `<span class="tc ${App.byId[id] && App.byId[id].lucky ? 'lk' : ''}" data-zoom="${id}" style="background-image:url('${cardImg(id)}')"></span>`).join('')}</div>` : '';
+    const top = s.deckTop && !win ? `<div class="tut-top">${T.limit ? `<em class="lim ${s.turn >= T.limit.turn ? 'now' : ''}">⏳ ${s.turn >= T.limit.turn ? '本回合内获胜' : '第 ' + T.limit.turn + ' 回合内获胜'}</em>` : ''}对手卡组顶 → ${s.deckTop[1].slice(0, 3).map(id => `<span class="tc ${App.byId[id] && App.byId[id].lucky ? 'lk' : ''}" data-zoom="${id}" style="background-image:url('${cardImg(id)}')"></span>`).join('')}</div>` : '';
     return `<div class="tutbox ${this.mini && !win ? 'mini' : ''}"><div class="tut-h" id="tut-h" title="点击收起/展开"><span>🎓 ${esc(T.title)}</span><small>${Math.min(this.i + 1, n)} / ${n} ${this.mini ? '▸' : '▾'}</small></div>
       <div class="tut-bar"><i style="width:${(win ? n : this.i) / n * 100}%"></i></div>
       <div class="tut-t">${win ? '🎉 <b>完成！</b>' + (T.next ? '继续下一课吧。' : '你已经学会了基本玩法，去「对战」挑战电脑吧！') : st.text || ''}</div>${top}
@@ -44,8 +44,16 @@ const Tutorial = {
     const nx = $('#tut-next'); if (nx) nx.onclick = () => { this.i++; Game.render(); };
     const re = $('#tut-re'); if (re) re.onclick = () => this.go(T.id);
     const ls = $('#tut-list'); if (ls) ls.onclick = () => { this.clear(); Game.leave(); setTimeout(() => this.open(), 250); };
+    this.place();
     this.guide(s);
   },
+  // 引导面板放在对手的建筑物区上（教程里这一排基本是空的），不挡据点、头像和提示条
+  place() {
+    const b = $('.tutbox'), z = $('#board [data-lane="obld"]'); if (!b || !z || innerWidth <= 900) return;
+    const r = z.getBoundingClientRect(); if (r.width < 260) return;
+    b.style.cssText = `position:fixed;left:${r.left + 4}px;top:${r.top + 2}px;width:${Math.min(400, r.width - 8)}px;max-height:${Math.max(r.height + 60, 150)}px;overflow:auto;transform:none;right:auto`;
+  },
+
   // ---------- 视觉引导：高亮光圈 + 手指演示（拖动 / 点击） ----------
   els(k) {
     const SEL = { op: '.plaque.op', me: '.plaque.me', end: '#endbtn', souls: '[data-souls="me"]', deck: '[data-pile="me-deck"]', opdeck: '[data-pile="op-deck"]', hand: '#hand', mpal: '[data-lane="mpal"]', mbld: '[data-lane="mbld"]' };
@@ -90,8 +98,9 @@ const Tutorial = {
   },
   result(s) {
     const T = s.tutorial, win = s.over.winner === s.me;
+    const tip = win ? '' : `<p style="text-align:center;color:#ffe7a8">💡 这一课的局面是设计好的：<b>只有按引导的打法</b>才能赢。点「再来一次」，跟着发光的手指试试。</p>`;
     if (win) { const d = this.done(); d[T.id] = 1; localStorage.setItem('ptcg_tut_done', JSON.stringify(d)); }
-    return `<div class="row" style="justify-content:center;margin:8px 0;gap:8px">
+    return tip + `<div class="row" style="justify-content:center;margin:8px 0;gap:8px">
       <button onclick="Tutorial.go('${T.id}')">↻ 再来一次</button>
       ${win && T.next ? `<button class="primary" onclick="Tutorial.go('${T.next}')">下一课 ▶</button>` : ''}
       ${win && !T.next ? `<button class="primary" onclick="Game.leave();setTimeout(()=>show('home'),250)">去对战电脑 ▶</button>` : ''}
@@ -101,13 +110,15 @@ const Tutorial = {
 (() => {
   const css = document.createElement('style');
   css.textContent = `
-  .tutbox{position:absolute;left:190px;top:4px;z-index:56;width:440px;background:#14202ff2;border:2px solid #ffd75a;border-radius:12px;color:#f3ecdc;font-size:14px;line-height:1.65;padding:8px 12px;box-shadow:0 6px 24px #0008}
+  .tutbox{position:absolute;left:calc(var(--cw, 110px) + 120px);top:50%;transform:translateY(-50%);z-index:56;width:min(360px,30vw);background:#14202ff2;border:2px solid #ffd75a;border-radius:12px;color:#f3ecdc;font-size:13.5px;line-height:1.6;padding:8px 12px;box-shadow:0 6px 24px #0008}
   .tutbox.mini .tut-bar,.tutbox.mini .tut-t,.tutbox.mini .tut-row,.tutbox.mini .tut-top{display:none}.tutbox .tut-h{cursor:pointer;display:flex;justify-content:space-between;font-weight:900;color:#ffd75a}.tutbox .tut-h small{color:#cdbb8a;font-weight:400}
   .tutbox .tut-bar{height:4px;background:#ffffff1c;border-radius:2px;margin:4px 0 6px;overflow:hidden}.tutbox .tut-bar i{display:block;height:100%;background:#ffd75a;transition:width .4s}
   .tutbox .tut-t b{color:#ffe7a8}
   .tutbox .tut-row{display:flex;gap:6px;margin-top:8px}.tutbox .tut-row button{padding:4px 12px;font-size:13px}
   .tutbox .tut-top{margin-top:6px;font-size:12px;color:#cdbb8a;display:flex;align-items:center;gap:6px}.tutbox .tut-top .tc{display:block;height:60px;width:43px;background:center/cover no-repeat;border-radius:4px;flex:none}
+  .tutbox .tut-top .lim{font-style:normal;background:#ffd75a22;border:1px solid #ffd75a;color:#ffe7a8;border-radius:10px;padding:1px 8px;margin-right:auto}.tutbox .tut-top .lim.now{background:#c0392b55;border-color:#ff7a6a;color:#fff;animation:tutPulse 1.4s infinite}
   .tutbox .tut-top .tc.lk{box-shadow:0 0 0 2px #ffd54a,0 0 12px #ffd54a}
+  @media (max-width:900px){.tutbox{right:6px;top:auto;bottom:calc(var(--ch,110px) + 30px);transform:none;width:min(320px,70vw);font-size:12.5px}}
   #tutfx{position:fixed;inset:0;pointer-events:none;z-index:57}
   #tutfx>*{position:fixed;pointer-events:none}
   .tut-ring{border:3px solid #ffd75a;box-shadow:0 0 18px 4px #ffd75a99,inset 0 0 14px #ffd75a55;animation:tutRing 1.2s ease-in-out infinite}

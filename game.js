@@ -117,7 +117,7 @@ const Game = {
     };
     const tgtPlayer = a && a.kind === 'option' && a.meta && a.meta.targets.includes('player');
     const piles = (p, side) => `<div class="pilecol a-${side === 'me' ? 'mright' : 'oleft'}">
-        <div class="pile deck ${side === 'me' && this.actsFor(undefined).some(x => x.t === 'soulDraw') ? 'can' : ''}" data-pile="${side}-deck"><span class="cap">卡组</span>${p.deck ? '<img src="/ui/card_back.jpg">' : ''}<span class="cnt">${p.deck}</span></div>
+        <div class="pile deck ${side === 'me' && this.actsFor(undefined).some(x => x.t === 'soulDraw') ? 'can' : ''}" data-pile="${side}-deck"><span class="cap">卡组</span>${p.deck ? '<img src="/ui/card_back.jpg" draggable="false">' : ''}<span class="cnt">${p.deck}</span></div>
         <div class="pile" data-pile="${side}-grave" data-grave="${side === 'me' ? 0 : 1}"><span class="cap">墓地</span>${p.grave.length ? `<img src="${cardImg(p.grave[p.grave.length - 1].id)}" data-zoom="${p.grave[p.grave.length - 1].id}">` : ''}<span class="cnt">${p.grave.length}</span></div></div>`;
     const souls = (p, side) => `<div class="pilecol a-${side === 'me' ? 'mleft' : 'oright'}">
         <div class="souls" data-souls="${side}"><span class="t">灵魂 ${p.soulsStanding}/${p.souls}</span><div class="sv">${Array.from({ length: p.souls }, (_, i) => `<span class="soul ${i < p.soulsStanding ? '' : 'r'}"></span>`).join('')}</div></div>
@@ -217,7 +217,7 @@ const Game = {
     ['#sel-ok', '#sel-ok2'].forEach(id => { const ok = $(id); if (ok) ok.onclick = () => this.answer(this.picked); });
     const eb = $('#endbtn'); if (eb) eb.onclick = () => { const i = a && a.kind === 'main' ? a.actions.findIndex(x => x.t === 'end') : -1; if (i >= 0) this.answer(i); };
     const dk = b.querySelector('[data-pile="me-deck"]');
-    if (dk) { dk.onclick = () => this.showDeck(); dk.addEventListener('pointerdown', e => this.down(e, dk, 'deck')); }
+    if (dk) { dk.onclick = () => { if (Date.now() - (this._dragEnd || 0) < 400) return; this.showDeck(); }; dk.addEventListener('pointerdown', e => this.down(e, dk, 'deck')); }
     const gid = $('#gidbtn'); if (gid) gid.onclick = () => { navigator.clipboard && navigator.clipboard.writeText(s.gid).catch(() => {}); toast('对局 ID 已复制：' + s.gid + '（可在大厅「复盘」中查看）'); };
     b.querySelectorAll('[data-plaque="op"]').forEach(x => x.onclick = () => { if (a && a.kind === 'option' && a.meta) { const i = a.meta.targets.indexOf('player'); if (i >= 0) this.answer(i); } });
     b.querySelectorAll('.card[data-uid]').forEach(el => el.addEventListener('pointerdown', e => this.down(e, el, 'card')));
@@ -381,7 +381,7 @@ const Game = {
       removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
       if (ev.type === 'pointercancel') { if (drag) drag.end(-9999, -9999); return; }
       if (!drag) { if (kind === 'card' && !window.__longPress) this.click(el); return; }
-      drag.end(ev.clientX, ev.clientY);
+      drag.end(ev.clientX, ev.clientY); this._dragEnd = Date.now();
     };
     addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   },

@@ -298,3 +298,6 @@ body.ingame.replaying #speedctl{top:96px}
 .volctl label{display:flex;align-items:center;gap:2px;font-size:12px}.volctl input{width:56px!important}
 .volctl.muted label{opacity:.35}
 body.dragging-now #tutfx{display:none}
+
+#board img{-webkit-user-drag:none;user-select:none}
+#board .pile.deck.can{cursor:grab;touch-action:none}

@@ -51,6 +51,17 @@
   }
 
   // ---------- 各类演出 ----------
+  // 屏幕中央的大号印章：阻挡 / 妨碍 等关键应对，配上使用的卡
+  const idByName = n => { n = n.replace(/[《》]/g, ''); const c = Object.values(App.byId).find(x => x.name === n); return c && c.id; };
+  function banner(title, sub, kind, cardId) {
+    $$('.fx2-ban').forEach(x => x.remove());
+    const d = add('fx2-ban ' + kind, '', `<div class="bg"></div>${cardId ? `<span class="cd" style="background-image:url('${cardImg(cardId)}')"></span>` : ''}<div class="tx"><b>${title}</b><small>${sub}</small></div>`);
+    anim(d.querySelector('.bg'), [{ transform: 'scaleY(0)', opacity: 0 }, { transform: 'scaleY(1)', opacity: 1, offset: .15 }, { transform: 'scaleY(1)', opacity: 1, offset: .85 }, { transform: 'scaleY(0)', opacity: 0 }], { duration: 1500, easing: 'ease-out' });
+    anim(d.querySelector('.tx'), [{ transform: 'scale(2.4)', opacity: 0 }, { transform: 'scale(.95)', opacity: 1, offset: .18 }, { transform: 'scale(1)', opacity: 1, offset: .85 }, { transform: 'scale(1)', opacity: 0 }], { duration: 1500, easing: 'cubic-bezier(.2,.8,.3,1)' });
+    const cd = d.querySelector('.cd'); if (cd) anim(cd, [{ transform: 'translateX(-120px) rotate(-14deg)', opacity: 0 }, { transform: 'translateX(0) rotate(-6deg)', opacity: 1, offset: .2 }, { transform: 'translateX(0) rotate(-6deg)', opacity: 1, offset: .85 }, { transform: 'translateX(40px) rotate(-6deg)', opacity: 0 }], { duration: 1500, easing: 'ease-out' });
+    document.body.classList.add('fx2-shake'); setTimeout(() => document.body.classList.remove('fx2-shake'), 400);
+    kill(d, 1550); Sound.sfx(kind === 'hinder' ? 'hit' : 'confirm');
+  }
   function shieldPop(r) {
     const c = C(r);
     const d = add('fx2-shield', `left:${c.x}px;top:${c.y}px`, '<i></i><b>🛡</b>');
@@ -145,11 +156,12 @@
       const find = (st, uid) => st.players.flatMap(p => p.base).find(c => c.uid === uid);
       const uidByName = (st, n) => { const c = st.players.flatMap(p => p.base).find(c => '《' + ((App.byId[c.id] || {}).name) + '》' === n); return c && c.uid; };
       const rectOf = uid => { const o = before.m.get(uid); if (o) return o.r; const el = cardEl(uid); return el && R(el.querySelector('.in')); };
-      let blocker = null, t0 = 0;
+      let blocker = null, t0 = 0, hinderBy = null;
       for (const l of newLog) {
         const mb = l.match(/^(《[^》]+》) 进行阻挡/);
-        if (mb) { blocker = uidByName(prev, mb[1]) || uidByName(s, mb[1]); const r = blocker && rectOf(blocker); if (r) { shieldPop(r); t0 = 900; dur = Math.max(dur, 1100); } }
-        if (/^攻击失败/.test(l) && pB) { const r = rectOf(pB.att); if (r) { barrier(r, cardEl(pB.att)); dur = Math.max(dur, 1200); } }
+        if (mb) { blocker = uidByName(prev, mb[1]) || uidByName(s, mb[1]); const r = blocker && rectOf(blocker); if (r) { shieldPop(r); t0 = 900; dur = Math.max(dur, 1500); } banner('🛡 阻挡！', mb[1] + ' 挡在了攻击前面', 'block', idByName(mb[1])); }
+        const mh = l.match(/^(《[^》]+》) 起动能力：妨碍/); if (mh) hinderBy = mh[1];
+        if (/^攻击失败/.test(l) && pB) { const r = rectOf(pB.att); if (r) { barrier(r, cardEl(pB.att)); dur = Math.max(dur, 1500); } banner('✋ 妨碍！', (hinderBy ? hinderBy + ' 使' : '') + '攻击失败', 'hinder', hinderBy && idByName(hinderBy)); }
       }
       if (B && pB && B.att === pB.att && B.blocked && !pB.blocked && !blocker) { const r = rectOf(B.target); if (r) { shieldPop(r); dur = Math.max(dur, 1100); } }
       // 战斗结束：帕鲁之间的对撞
@@ -232,6 +244,15 @@
   .fx2-shield{width:120px;height:120px;display:grid;place-items:center}
   .fx2-shield i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#8fd0ff88,#2a6fd622 60%,transparent 70%);box-shadow:0 0 0 4px #9fd8ff,0 0 40px #4aa8ff}
   .fx2-shield b{font-size:54px;filter:drop-shadow(0 0 10px #4aa8ff)}
+  .fx2-ban{position:fixed;left:0;right:0;top:38%;height:130px;z-index:95;pointer-events:none;display:flex;align-items:center;justify-content:center;gap:22px}
+  .fx2-ban .bg{position:absolute;inset:0;background:linear-gradient(90deg,#0000,#14202ff0 20%,#14202ff0 80%,#0000);border-top:2px solid var(--bc);border-bottom:2px solid var(--bc);box-shadow:0 0 40px var(--bc)}
+  .fx2-ban.block{--bc:#5ab0ff}.fx2-ban.hinder{--bc:#ff5a5a}
+  .fx2-ban .cd{position:relative;width:78px;height:109px;background:center/cover;border-radius:6px;box-shadow:0 0 0 2px var(--bc),0 0 24px var(--bc)}
+  .fx2-ban .tx{position:relative;display:flex;flex-direction:column;align-items:flex-start}
+  .fx2-ban b{font-size:52px;font-weight:900;color:#fff;letter-spacing:4px;text-shadow:0 0 16px var(--bc),0 0 30px var(--bc),0 3px 0 #000}
+  .fx2-ban small{font-size:16px;color:#f3ecdc;opacity:.9}
+  body.fx2-shake #board{animation:fx2Shake .35s}
+  @keyframes fx2Shake{20%{transform:translate(-6px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,0)}}
   .fx2-barrier{width:150px;height:150px;display:grid;place-items:center}
   .fx2-barrier b{font-size:66px;filter:drop-shadow(0 0 14px #fff) drop-shadow(0 0 22px #ff5050)}
   .fx2-barrier em{position:absolute;left:50%;top:50%;width:70px;height:3px;background:linear-gradient(90deg,#fff,#fff0);transform-origin:0 50%;transform:rotate(var(--a))}
